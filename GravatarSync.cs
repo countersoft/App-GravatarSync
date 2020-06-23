@@ -35,16 +35,26 @@ namespace GravatarSync
 
                     if (settings.UseGravatar)
                     {
-                        byte[] picture = ImageHelper.GetGravatar(user.Entity.Email.ToLowerInvariant(), 64);
-
-                        if (picture != null && (settings.Picture == null || !picture.SequenceEqual(settings.Picture)))
+                        try
                         {
-                            settings.Picture = picture;
+                            var picture = ImageHelper.GetGravatar(user.Entity.Email.ToLowerInvariant(), 64);
+                            if ( picture != null && ( settings.Picture == null || !picture.SequenceEqual( settings.Picture ) ) )
+                            {
+                                settings.Picture = picture;
 
-                            userManager.UpdateSettings(user.Entity.Id, settings);
+                                userManager.UpdateSettings( user.Entity.Id, settings );
 
-                            LogDebugMessage(string.Concat("Gravatar was updated for ", user.Entity.Email));
+                                LogDebugMessage( string.Concat( "Gravatar was updated for ", user.Entity.Email ) );
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            LogDebugMessage( string.Concat( "Error processing gravatar for ", user.Entity.Email.ToLowerInvariant() , 
+                                " detail: ", ex.Message) );
+                            LogException(ex);
+                        }
+                        
+                        
                     }
                 }
                 catch (Exception ex)
